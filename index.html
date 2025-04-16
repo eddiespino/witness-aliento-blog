@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Vota Witness · Aliento</title>
+</head>
+<body>
+  <h1 id="titulo">Cargando…</h1>
+  <div id="info"></div>
+  <button id="btn-votar" style="display:none">Votar</button>
+
+  <script src="https://unpkg.com/@hiveio/hive-js/dist/hive.min.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', async ()=>{
+    // 1. Parsear ruta: default a aliento si es /
+    let path = window.location.pathname.slice(1) || '@aliento';
+    let account = path.startsWith('@') ? path.slice(1) : path;
+    // 2. Mostrar nombre
+    document.getElementById('titulo').innerText = `Testigo: ${account}`;
+    // 3. Traer datos del witness
+    const client = hive.api; // usa el default RPC
+    try {
+      let wiz = await hive.api.getWitnessByAccountAsync(account);
+      document.getElementById('info').innerHTML = `
+        Votos: ${wiz.votes}<br>
+        URL: <a href="${wiz.url}" target="_blank">${wiz.url}</a><br>
+        Autoridad: ${wiz.signing_key}
+      `;
+      document.getElementById('btn-votar').style.display = 'inline-block';
+    } catch(e) {
+      document.getElementById('info').innerText = 'Testigo no encontrado.';
+    }
+    // 4. Botón de voto
+    document.getElementById('btn-votar').addEventListener('click', ()=>{
+      if (!window.hive_keychain) return alert('Instala Hive Keychain');
+      window.hive_keychain.requestVote(account, true, (resp)=>{
+        if (resp.success) alert('¡Votaste con éxito!');
+        else alert('Error al votar.');
+      });
+    });
+  });
+  </script>
+</body>
+</html>
