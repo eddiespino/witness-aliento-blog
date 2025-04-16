@@ -3,42 +3,93 @@
 <head>
   <meta charset="UTF-8"/>
   <title>Vota Witness · Aliento</title>
+  <style>
+    #btn-votar {
+      display: none;
+    }
+  </style>
 </head>
 <body>
   <h1 id="titulo">Cargando…</h1>
   <div id="info"></div>
-  <button id="btn-votar" style="display:none">Votar</button>
+  <button id="btn-votar">Votar</button>
 
   <script src="https://unpkg.com/@hiveio/hive-js/dist/hive.min.js"></script>
   <script>
-  document.addEventListener('DOMContentLoaded', async ()=>{
+  (async ()=>{
     // 1. Parsear ruta: default a aliento si es /
-    let path = window.location.pathname.slice(1) || '@aliento';
+    let path = window.location.pathname.slice(1).replace(/[^a-zA-Z0-9@_-]/g, '') || '@aliento';
     let account = path.startsWith('@') ? path.slice(1) : path;
     // 2. Mostrar nombre
     document.getElementById('titulo').innerText = `Testigo: ${account}`;
     // 3. Traer datos del witness
     const client = hive.api; // usa el default RPC
     try {
-      let wiz = await hive.api.getWitnessByAccountAsync(account);
+      if (!hive.api) {
+        document.getElementById('info').innerText = 'Error: Hive API no está disponible.';
+      let wiz = await client.getWitnessByAccountAsync(account);
+      const isValidUrl = (url) => {
+        try {
+          const parsedUrl = new URL(url);
+          return ['http:', 'https:'].includes(parsedUrl.protocol);
+        } catch {
+          return false;
+        }
+      };
+
+      const safeUrl = isValidUrl(wiz.url) ? wiz.url : '#';
       document.getElementById('info').innerHTML = `
-        Votos: ${wiz.votes}<br>
-        URL: <a href="${wiz.url}" target="_blank">${wiz.url}</a><br>
-        Autoridad: ${wiz.signing_key}
+        URL: <a href="${safeUrl}" target="_blank">${safeUrl === '#' ? 'URL no válida' : wiz.url}</a><br/>
+        Autoridad: ${wiz.signing_key}<br/>
+        Votos: ${String(wiz.votes).replace(/</g, "&lt;").replace(/>/g, "&gt;")}
       `;
-      document.getElementById('btn-votar').style.display = 'inline-block';
-    } catch(e) {
-      document.getElementById('info').innerText = 'Testigo no encontrado.';
+      if (!window.hive_keychain || typeof window.hive_keychain.requestVote !== 'function') {
+        alert('Hive Keychain no está completamente cargado o no está disponible. Por favor, verifica la instalación.');
+        return;
+      }
+      document.getElementById('info').innerHTML = `
+        URL: <a href="${safeUrl}" target="_blank">${safeUrl === '#' ? 'URL no válida' : wiz.url}</a><br>
+        Autoridad: ${wiz.signing_key}<br>
+        Votos: ${String(wiz.votes).replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+        `;
+        document.getElementById('btn-votar').addEventListener('click', async () => {
+          if (!window.hive_keychain) {
+            alert('Instala Hive Keychain');
+            return;
+          }
+          if (!account || typeof account !== 'string' || account.trim() === '') {
+            alert('Cuenta inválida. Por favor, verifica la URL.');
+            return;
+          }
+          try {
+            const resp = await window.hive_keychain.requestVote(account, true);
+            const messages = {
+              success: {
+                es: '¡Votaste con éxito!',
+                en: 'You voted successfully!'
+              },
+              error: {
+                es: 'Error al votar.',
+                en: 'Error while voting.'
+              }
+            };
+            const userLang = navigator.language.startsWith('es') ? 'es' : 'en';
+            if (resp.success) {
+              alert(messages.success[userLang]);
+            } else {
+              alert(messages.error[userLang]);
+            }
+          } catch (e) {
+            alert('Error al votar.');
+          }
+        });
+      } else {
+        alert('Error al votar.');
+      }
+    } catch (e) {
+      document.getElementById('info').innerText = 'Error al cargar los datos del testigo.';
     }
-    // 4. Botón de voto
-    document.getElementById('btn-votar').addEventListener('click', ()=>{
-      if (!window.hive_keychain) return alert('Instala Hive Keychain');
-      window.hive_keychain.requestVote(account, true, (resp)=>{
-        if (resp.success) alert('¡Votaste con éxito!');
-        else alert('Error al votar.');
-      });
-    });
-  });
+  })();
   </script>
 </body>
 </html>
