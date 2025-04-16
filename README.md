@@ -1,2 +1,2 @@
 # witness-aliento-blog
-Website to vote for witnesses.
+Website to vote for Hive witnesses.
