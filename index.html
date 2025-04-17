@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <title>Vota Witness · Aliento</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="preload" href="css/styles.css" as="style" onload="this.rel='stylesheet'">
 </head>
 <body>
   <main>
@@ -11,8 +11,10 @@
     <section id="info"></section>
     <button id="btn-votar" aria-live="polite">Votar</button>
   </main>
-
   <script src="https://unpkg.com/@hiveio/hive-js/dist/hive.min.js"></script>
   <script src="js/app.js" type="module" defer></script>
 </body>
+<footer>
+    <p>Desarrollado por <a href="https://aliento.blog" target="_blank">Aliento</a></p>
+</footer>
 </html>
