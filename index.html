@@ -1,95 +1,117 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vota Witness · Aliento</title>
   <style>
-    #btn-votar {
-      display: none;
-    }
+    body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
+    #spinner { display: none; }
+    #btn-votar { display: none; padding: 0.6rem 1.2rem; font-size: 1rem; cursor: pointer; }
+    .error { color: red; }
   </style>
 </head>
 <body>
   <h1 id="titulo">Cargando…</h1>
+  <div id="spinner">⏳ Cargando información…</div>
   <div id="info"></div>
-  <button id="btn-votar">Votar</button>
+  <button id="btn-votar" aria-live="polite">Votar</button>
 
   <script src="https://unpkg.com/@hiveio/hive-js/dist/hive.min.js"></script>
-  <script>
-  (async ()=>{
-    // 1. Parsear ruta: default a aliento si es /
-    let path = window.location.pathname.slice(1).replace(/[^a-zA-Z0-9@_-]/g, '') || '@aliento';
-    let account = path.startsWith('@') ? path.slice(1) : path;
-    // 2. Mostrar nombre
-    document.getElementById('titulo').innerText = `Testigo: ${account}`;
-    // 3. Traer datos del witness
-    const client = hive.api; // usa el default RPC
-    try {
-      if (!hive.api) {
-        document.getElementById('info').innerText = 'Error: Hive API no está disponible.';
-      let wiz = await client.getWitnessByAccountAsync(account);
-      const isValidUrl = (url) => {
-        try {
-          const parsedUrl = new URL(url);
-          return ['http:', 'https:'].includes(parsedUrl.protocol);
-        } catch {
-          return false;
-        }
-      };
+  <script type="module" defer>
+    // Helpers
+    const escapeHtml = text => String(text)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
 
-      const safeUrl = isValidUrl(wiz.url) ? wiz.url : '#';
-      document.getElementById('info').innerHTML = `
-        URL: <a href="${safeUrl}" target="_blank">${safeUrl === '#' ? 'URL no válida' : wiz.url}</a><br/>
-        Autoridad: ${wiz.signing_key}<br/>
-        Votos: ${String(wiz.votes).replace(/</g, "&lt;").replace(/>/g, "&gt;")}
-      `;
-      if (!window.hive_keychain || typeof window.hive_keychain.requestVote !== 'function') {
-        alert('Hive Keychain no está completamente cargado o no está disponible. Por favor, verifica la instalación.');
-        return;
+    const sanitizeUrl = url => {
+      try {
+        const u = new URL(url);
+        return ['http:', 'https:'].includes(u.protocol) ? u.href : '#';
+      } catch {
+        return '#';
       }
-      document.getElementById('info').innerHTML = `
-        URL: <a href="${safeUrl}" target="_blank">${safeUrl === '#' ? 'URL no válida' : wiz.url}</a><br>
-        Autoridad: ${wiz.signing_key}<br>
-        Votos: ${String(wiz.votes).replace(/</g, "&lt;").replace(/>/g, "&gt;")}
-        `;
-        document.getElementById('btn-votar').addEventListener('click', async () => {
-          if (!window.hive_keychain) {
-            alert('Instala Hive Keychain');
-            return;
-          }
-          if (!account || typeof account !== 'string' || account.trim() === '') {
-            alert('Cuenta inválida. Por favor, verifica la URL.');
-            return;
-          }
-          try {
-            const resp = await window.hive_keychain.requestVote(account, true);
-            const messages = {
-              success: {
-                es: '¡Votaste con éxito!',
-                en: 'You voted successfully!'
-              },
-              error: {
-                es: 'Error al votar.',
-                en: 'Error while voting.'
-              }
-            };
-            const userLang = navigator.language.startsWith('es') ? 'es' : 'en';
-            if (resp.success) {
-              alert(messages.success[userLang]);
-            } else {
-              alert(messages.error[userLang]);
-            }
-          } catch (e) {
-            alert('Error al votar.');
-          }
-        });
-      } else {
-        alert('Error al votar.');
-      }
-    } catch (e) {
-      document.getElementById('info').innerText = 'Error al cargar los datos del testigo.';
+    };
+
+    const showError = msg => {
+      document.getElementById('spinner').style.display = 'none';
+      document.getElementById('info').innerHTML = `<p class="error">${escapeHtml(msg)}</p>`;
+    };
+
+    // Core functions
+    function parseAccountFromPath() {
+      const path = new URL(location).pathname;
+      const clean = path.replace(/^\/@?/, '').replace(/\/$/, '');
+      return clean || 'aliento';
     }
-  })();
+
+    async function fetchWitness(account) {
+      if (!hive || !hive.api) throw new Error('Hive API no disponible');
+      return hive.api.getWitnessByAccountAsync(account);
+    }
+
+    function renderInfo(wiz) {
+      const infoEl = document.getElementById('info');
+      const url = sanitizeUrl(wiz.url);
+      infoEl.innerHTML = `
+        <p>URL: ${url === '#' ? 'URL no válida' : `<a href="${url}" target="_blank">${escapeHtml(wiz.url)}</a>`}</p>
+        <p>Autoridad: ${escapeHtml(wiz.signing_key)}</p>
+        <p>Votos: ${escapeHtml(wiz.votes)}</p>
+      `;
+    }
+
+    function setupVoteButton(account) {
+      const btn = document.getElementById('btn-votar');
+      btn.style.display = 'inline-block';
+      btn.addEventListener('click', async () => {
+        if (!window.hive_keychain?.requestVote) {
+          alert('Instala Hive Keychain');
+          return;
+        }
+        btn.disabled = true;
+        try {
+          const resp = await new Promise((resolve, reject) => {
+            window.hive_keychain.requestVote(account, true, r => r ? resolve(r) : reject());
+          });
+          btn.textContent = resp.success ? '¡Votado ✅' : 'Error al votar';
+        } catch {
+          alert('Error al votar');
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    }
+
+    // Initialization
+    document.addEventListener('DOMContentLoaded', async () => {
+      const account = parseAccountFromPath();
+      document.getElementById('titulo').textContent = `Testigo: ${escapeHtml(account)}`;
+      document.getElementById('spinner').style.display = 'block';
+
+      try {
+        const wiz = await fetchWitness(account);
+        document.getElementById('spinner').style.display = 'none';
+        renderInfo(wiz);
+        setupVoteButton(account);
+      } catch (e) {
+        showError(e.message.includes('no disponible') ? e.message : 'Error al cargar datos del testigo');
+      }
+    });
   </script>
 </body>
 </html>
+<!--
+  Este archivo HTML es parte de la aplicación web para votar testigos en Hive.
+  Se utiliza para mostrar información sobre un testigo específico y permitir al usuario votar por él.
+  La aplicación utiliza la API de Hive y la extensión Hive Keychain para gestionar las votaciones.
+  El código incluye funciones para parsear la URL, obtener información del testigo, renderizarla en la página,
+  y manejar el evento de votación.
+  Se incluyen estilos básicos para la presentación y se utilizan funciones de JavaScript para la lógica de la aplicación.
+  La aplicación está diseñada para ser sencilla y fácil de usar, con un enfoque en la accesibilidad y la usabilidad.
+  Se recomienda instalar la extensión Hive Keychain para facilitar el proceso de votación.
+  La aplicación maneja errores de forma adecuada, mostrando mensajes claros al usuario en caso de problemas.
+  Se utiliza la función `escapeHtml` para evitar inyecciones de HTML y asegurar que el contenido se muestre de forma segura.
+  La aplicación está diseñada para ser responsive y funcionar en dispositivos móviles y de escritorio.
+  Se recomienda mantener el código limpio y bien documentado para facilitar futuras modificaciones y mejoras.
+  La aplicación está escrita en JavaScript moderno, utilizando funciones asíncronas y promesas para manejar operaciones asíncronas.
