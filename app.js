@@ -42,10 +42,10 @@ function setVoteLoading(loading) {
   const button = document.getElementById('btn-votar');
   if (loading) {
     button.disabled = true;
-    button.textContent = 'Votando...';
+    button.textContent = 'Voting...';
   } else {
     button.disabled = false;
-    button.textContent = 'Votar';
+    button.textContent = '🔑 Vote with Keychain';
   }
 }
 
