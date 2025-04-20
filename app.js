@@ -1,3 +1,4 @@
+
 // Theme toggle functionality
 const themeToggle = document.getElementById('theme-toggle');
 const theme = localStorage.getItem('theme') || 'light';
@@ -10,22 +11,29 @@ themeToggle.addEventListener('click', () => {
   localStorage.setItem('theme', newTheme);
 });
 
-try
-  {
+// Vote functionality
+document.getElementById('btn-votar').addEventListener('click', async () => {
+  const username = document.getElementById('usuario').value.trim();
+  
+  if (!username) {
+    alert('Por favor ingrese un nombre de usuario');
+    return;
+  }
+
+  try {
     const keychain = new KeychainSDK(window);
     
-    const formParamsAsObject = {
-     "data": {
-          "username": "eddiespino",
-          "witness": "aliento",
-          "vote": true
-     }
-}
+    const voteData = {
+      username: username,
+      witness: 'aliento',
+      vote: true
+    };
     
-    const witnessvote = await keychain
-         .witnessVote(
-              formParamsAsObject.data);
+    const witnessvote = await keychain.witnessVote(voteData);
+    alert('¡Voto exitoso!');
     console.log({ witnessvote });
   } catch (error) {
-    console.log({ error });
+    alert('Error al votar: ' + error.message);
+    console.error({ error });
   }
+});
