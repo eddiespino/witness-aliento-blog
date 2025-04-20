@@ -79,6 +79,31 @@ h1, h2 {
 #lista-testigos {
   list-style: none;
   padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.witness-item {
+  background: var(--bg-color);
+  border: 1px solid var(--text-color);
+  border-radius: 8px;
+  padding: 1rem;
+  transition: transform 0.2s;
+}
+
+.witness-item:hover {
+  transform: translateY(-2px);
+}
+
+.witness-item h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-color);
+}
+
+.witness-item p {
+  margin: 0.25rem 0;
+  color: var(--text-color);
 }
 
 footer {

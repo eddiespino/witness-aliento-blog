@@ -1,4 +1,44 @@
 
+// Fetch and display witness list
+async function fetchWitnesses() {
+  try {
+    const response = await fetch('https://api.hive.blog', {
+      method: 'POST',
+      body: JSON.stringify({
+        "jsonrpc": "2.0",
+        "method": "condenser_api.get_witnesses_by_vote",
+        "params": ["", 100],
+        "id": 1
+      })
+    });
+    
+    const data = await response.json();
+    const witnesses = data.result;
+    const witnessList = document.getElementById('lista-testigos');
+    witnessList.innerHTML = witnesses.map(witness => `
+      <li class="witness-item">
+        <h3>${witness.owner}</h3>
+        <p>Votes: ${witness.votes}</p>
+        <p>Rank: ${witness.running_version}</p>
+      </li>
+    `).join('');
+  } catch (error) {
+    console.error('Error fetching witnesses:', error);
+  }
+}
+
+// Loading state for vote button
+function setVoteLoading(loading) {
+  const button = document.getElementById('btn-votar');
+  if (loading) {
+    button.disabled = true;
+    button.textContent = 'Votando...';
+  } else {
+    button.disabled = false;
+    button.textContent = 'Votar';
+  }
+}
+
 // Theme toggle functionality
 const themeToggle = document.getElementById('theme-toggle');
 const theme = localStorage.getItem('theme') || 'light';
@@ -12,7 +52,11 @@ themeToggle.addEventListener('click', () => {
 });
 
 // Vote functionality
+// Initialize witness list on load
+document.addEventListener('DOMContentLoaded', fetchWitnesses);
+
 document.getElementById('btn-votar').addEventListener('click', async () => {
+  setVoteLoading(true);
   const username = document.getElementById('usuario').value.trim();
   
   if (!username) {
@@ -32,8 +76,11 @@ document.getElementById('btn-votar').addEventListener('click', async () => {
     const witnessvote = await keychain.witnessVote(voteData);
     alert('¡Voto exitoso!');
     console.log({ witnessvote });
+    await fetchWitnesses(); // Refresh witness list
   } catch (error) {
     alert('Error al votar: ' + error.message);
     console.error({ error });
+  } finally {
+    setVoteLoading(false);
   }
 });
