@@ -30,16 +30,17 @@
   <button id="theme-toggle" aria-label="Toggle dark mode">🌓</button>
   <main class="container">
     <h1 id="titulo">Vota por Testigo</h1>
+    <section id="voto">
+      <h2>Votar</h2>
+      <label for="usuario">Usuario:</label>
+      <input type="text" id="usuario" placeholder="ej: aliento" aria-required="true"/>
+      <button id="btn-votar" aria-live="polite">🔑 Vote with Keychain</button>
+    </section>
     <section id="info"></section>
     <section id="testigos">
       <h2>Testigos</h2>
       <ul id="lista-testigos"></ul>
     </section>
-    <section id="voto">
-      <h2>Votar</h2>
-      <label for="usuario">Usuario:</label>
-      <input type="text" id="usuario" placeholder="ej: aliento" aria-required="true"/>
-    <button id="btn-votar" aria-live="polite">🔑 Vote with Keychain</button>
   </main>
   <footer>
     <p>Desarrollado por <a href="https://aliento.blog" target="_blank">Aliento</a></p>
