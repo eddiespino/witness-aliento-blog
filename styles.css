@@ -88,8 +88,11 @@ h1, h2 {
   background: var(--bg-color);
   border: 1px solid var(--text-color);
   border-radius: 8px;
-  padding: 1rem;
+  padding: 1.5rem;
   transition: transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .witness-item:hover {

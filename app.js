@@ -26,6 +26,10 @@ async function fetchWitnesses() {
         <p>Rank: #${index + 1}</p>
         <p>Votes: ${vestsToHP(witness.votes)} HP</p>
         <p>Version: ${witness.running_version}</p>
+        <p>Price Feed: $${parseFloat(witness.hbd_exchange_rate.base).toFixed(3)}</p>
+        <p>Missed Blocks: ${witness.total_missed}</p>
+        <p>Last Block: ${witness.last_confirmed_block_num}</p>
+        <p>Location: ${witness.url.includes('location') ? witness.url.split('location:')[1].split(',')[0] : 'No especificada'}</p>
       </li>
     `).join('');
   } catch (error) {
