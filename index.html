@@ -8,8 +8,26 @@
   <meta charset="UTF-8"/>
   <title>Vota por Testigos · Desarrollado por Aliento</title>
   <link href="css/styles.css" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #000000;
+    }
+    
+    [data-theme="dark"] {
+      --bg-color: #1a1a1a;
+      --text-color: #ffffff;
+    }
+    
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      transition: background-color 0.3s, color 0.3s;
+    }
+  </style>
 </head>
 <body>
+  <button id="theme-toggle" aria-label="Toggle dark mode">🌓</button>
   <main>
     <h1 id="titulo">Vota por Testigo</h1>
     <section id="info"></section>

@@ -2,6 +2,23 @@ body {
     font-family: sans-serif;
     margin: 2rem;
   }
+  
+  #theme-toggle {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.5rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+  }
+  
+  #theme-toggle:hover {
+    background-color: rgba(128, 128, 128, 0.2);
+  }
   #btn-votar {
     visibility: hidden;
     padding: 0.5rem 1rem;
