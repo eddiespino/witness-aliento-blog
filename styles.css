@@ -1,37 +1,98 @@
-body {
-    font-family: sans-serif;
-    margin: 2rem;
-  }
-  
-  #theme-toggle {
-    position: fixed;
-    top: 1rem;
-    right: 1rem;
-    padding: 0.5rem;
-    font-size: 1.5rem;
-    cursor: pointer;
-    background: none;
-    border: none;
-    border-radius: 50%;
-    transition: background-color 0.3s;
-  }
-  
-  #theme-toggle:hover {
-    background-color: rgba(128, 128, 128, 0.2);
-  }
-  #btn-votar {
-    visibility: hidden;
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-    cursor: pointer;
-  }
-  .btn-disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
 
-  #btn-votar[disabled] {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-  
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  margin: 0;
+  padding: 2rem;
+  line-height: 1.6;
+}
+
+main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2 {
+  margin-bottom: 1.5rem;
+  color: var(--text-color);
+}
+
+#theme-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.8rem;
+  font-size: 1.5rem;
+  cursor: pointer;
+  background: none;
+  border: 1px solid var(--text-color);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+#theme-toggle:hover {
+  transform: scale(1.1);
+  background-color: rgba(128, 128, 128, 0.2);
+}
+
+#usuario {
+  width: 100%;
+  max-width: 300px;
+  padding: 0.8rem;
+  margin: 1rem 0;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+#usuario:focus {
+  outline: none;
+  border-color: #4a90e2;
+}
+
+#btn-votar {
+  visibility: visible;
+  padding: 0.8rem 2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+#btn-votar:hover:not([disabled]) {
+  background-color: #357abd;
+  transform: translateY(-2px);
+}
+
+#btn-votar[disabled], .btn-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #999;
+}
+
+#lista-testigos {
+  list-style: none;
+  padding: 0;
+}
+
+footer {
+  text-align: center;
+  margin-top: 3rem;
+  padding: 1rem;
+  color: var(--text-color);
+}
+
+footer a {
+  color: #4a90e2;
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
