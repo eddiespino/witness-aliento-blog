@@ -14,12 +14,17 @@ async function fetchWitnesses() {
     
     const data = await response.json();
     const witnesses = data.result;
+    const vestsToHP = vests => {
+      const totalVests = parseFloat(vests) / 1e6;
+      return (totalVests * 0.49).toFixed(0);
+    };
+    
     const witnessList = document.getElementById('lista-testigos');
     witnessList.innerHTML = witnesses.map((witness, index) => `
       <li class="witness-item">
         <h3>${witness.owner}</h3>
         <p>Rank: #${index + 1}</p>
-        <p>Votes: ${witness.votes}</p>
+        <p>Votes: ${vestsToHP(witness.votes)} HP</p>
         <p>Version: ${witness.running_version}</p>
       </li>
     `).join('');
